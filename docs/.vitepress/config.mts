@@ -1,6 +1,6 @@
 import { defineConfig } from 'vitepress';
 
-const base = process.env.DOCS_BASE ?? '/';
+const base = '/codex-sdk/';
 
 export default defineConfig({
   title: 'Codex SDK',

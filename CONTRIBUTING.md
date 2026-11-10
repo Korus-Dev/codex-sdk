@@ -5,10 +5,9 @@ Use Node.js 26.12.1 (`.node-version`) for development. The runtime floor is 22.1
 ```sh
 npm ci
 npm run check
-npm run build:docs
 ```
 
-`check` runs source/test typechecks, coverage, the package build, and an npm pack dry run. The 85% statement threshold must remain intact.
+`check` runs source/test typechecks, coverage, the package build, an installed-tarball consumer check, and the VitePress build. The 85% statement threshold must remain intact.
 
 Keep changes focused on the raw Codex app-server protocol, client, transports, and executable discovery. Provider-neutral conversation APIs belong in multi-agent-sdk; UI and native UI adapters belong in agent-ui-sdk. Host approval decisions, persistence, product workflows, and logging policy belong in applications.
 
@@ -25,3 +24,9 @@ npm run check:schema -- --codex /absolute/path/to/codex-0.167.0
 This generates schema locally without authentication or provider turns. It does not change your global CLI.
 
 Report bugs with the SDK version, Node/OS version, Codex CLI version, selected transport, and a minimal reproduction. Remove credentials and private protocol payloads before sharing output.
+
+## Agent test runs
+
+During development, use `npm run test:ai -- <name-or-path>` for targeted unit tests or `npm run test:ai` for the unit suite. Do not call `vitest` or `npx vitest` directly, and do not use `npm test` for agent runs. The quiet reporter prints failure details and a short summary, followed by `[TESTS:DONE]`. The standard Vitest configuration, setup, and timeouts still apply. Use `npm run check` as the final handoff gate.
+
+Live or native provider tests, browser/Playwright tests, and publishing are off-limits to agents unless Nicolas explicitly authorizes them. The unit suite's fake transports and local socket fixtures do not launch native providers.

@@ -1,35 +1,56 @@
 {
-  "version": "0.167.0",
-  "type": "module",
-  "license": "Apache-2.0",
-  "files": [
-    "dist",
-    "LICENSE",
-    "README.md"
-  ],
-  "scripts": {
-    "build": "vite build && tsc -p tsconfig.json",
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run",
-    "test:coverage": "vitest run --coverage",
-    "generate:schema": "node scripts/generate-codex-schema.mjs",
-    "check:schema": "node scripts/generate-codex-schema.mjs --check",
-    "typecheck:tests": "tsc -p tsconfig.tests.json --noEmit",
-    "dev:docs": "vitepress dev docs --port 5175",
-    "build:docs": "npm run check:rpc && npm run typecheck:docs && vitepress build docs",
-    "preview:docs": "vitepress preview docs --port 4175",
-    "generate:rpc": "node scripts/generate-protocol-docs.mjs",
-    "check:rpc": "node scripts/generate-protocol-docs.mjs --check",
-    "typecheck:docs": "tsc -p tsconfig.docs.json --noEmit",
-    "check": "npm run typecheck && npm run typecheck:tests && npm run test:coverage && npm run build && npm pack --dry-run --ignore-scripts --loglevel=error",
-    "prepack": "npm run build"
-  },
   "name": "@korus-dev/codex-sdk",
+  "version": "0.167.0",
   "description": "Typed Codex app-server JSON-RPC client and Node.js transports.",
+  "license": "Apache-2.0",
+  "author": "Nicolas Bonamy",
+  "homepage": "https://korus-dev.github.io/codex-sdk/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Korus-Dev/codex-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Korus-Dev/codex-sdk/issues"
+  },
+  "keywords": [
+    "codex",
+    "app-server",
+    "json-rpc",
+    "typescript",
+    "sdk"
+  ],
+  "type": "module",
+  "sideEffects": false,
   "engines": {
     "node": ">=22.19.0"
   },
-  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "build": "vite build && tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "typecheck:tests": "tsc -p tsconfig.tests.json --noEmit",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:ai": "vitest --run --silent --reporter=./tests/reporter/silent.ts",
+    "check:package": "node scripts/check-package.mjs",
+    "build:docs": "npm run check:rpc && npm run typecheck:docs && vitepress build docs",
+    "prepack": "npm run build",
+    "check": "npm run typecheck && npm run typecheck:tests && npm run test:coverage && npm run build && npm run check:package && npm run build:docs",
+    "generate:schema": "node scripts/generate-codex-schema.mjs",
+    "check:schema": "node scripts/generate-codex-schema.mjs --check",
+    "dev:docs": "vitepress dev docs --port 5175",
+    "preview:docs": "vitepress preview docs --port 4175",
+    "generate:rpc": "node scripts/generate-protocol-docs.mjs",
+    "check:rpc": "node scripts/generate-protocol-docs.mjs --check",
+    "typecheck:docs": "tsc -p tsconfig.docs.json --noEmit"
+  },
   "devDependencies": {
     "@types/node": "25.9.5",
     "@vitest/coverage-v8": "4.1.12",
@@ -42,27 +63,6 @@
     "access": "public",
     "registry": "https://registry.npmjs.org/"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Korus-Dev/codex-sdk.git"
-  },
-  "author": {
-    "name": "Nicolas Bonamy",
-    "email": "nicolas@bonamy.fr"
-  },
-  "homepage": "https://github.com/Korus-Dev/codex-sdk#readme",
-  "bugs": {
-    "url": "https://github.com/Korus-Dev/codex-sdk/issues"
-  },
-  "keywords": [
-    "codex",
-    "app-server",
-    "json-rpc",
-    "typescript",
-    "sdk"
-  ],
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
   "overrides": {
     "vitepress": {
       "vite": "6.4.6"

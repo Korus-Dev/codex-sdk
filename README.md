@@ -110,10 +110,9 @@ Import runtime APIs and types from `@korus-dev/codex-sdk`. See the [export refer
 ```sh
 npm ci
 npm run check
-npm run build:docs
 ```
 
-Development uses Node.js 26.12.1, pinned in `.node-version`. `check` runs typechecks, tests with coverage, the package build, and an npm pack dry run. Preview the VitePress documentation with `npm run dev:docs`.
+Development uses Node.js 26.12.1, pinned in `.node-version`. `check` runs typechecks, tests with coverage, the package build, a packed-consumer check, and the VitePress build. Preview the VitePress documentation with `npm run dev:docs`.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) and the [development guide](docs/guide/development.md) for schema generation, CLI verification, and release workflows.
 

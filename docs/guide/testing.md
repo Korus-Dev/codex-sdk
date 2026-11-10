@@ -3,7 +3,7 @@
 The test suite runs locally with fake transports, child-process fixtures, and local socket probes. It verifies protocol behavior without provider turns.
 
 ```sh
-npm test
+npm run test:ai
 npm run typecheck
 npm run typecheck:tests
 npm run typecheck:docs
@@ -22,4 +22,10 @@ For a regression test, identify the observable contract, the defect it prevents,
 
 ## Package contents
 
-`npm run check` builds the package and runs `npm pack --dry-run --ignore-scripts` to verify that npm can prepare the distributable. Runtime client and transport behavior is covered by the test suite. CI separately checks schema output from the pinned CLI.
+`npm run check:package` packs the built SDK with scripts disabled, enforces the tarball file allowlist, and installs it in a temporary consumer. It imports the public root in plain Node ESM and compiles a strict TypeScript consumer with Bundler resolution. The temporary files are removed afterward. Run `npm run build` first, or use `npm run check` for the complete typecheck, test, build, package, and documentation gate. CI separately checks schema output from the pinned CLI.
+
+## Agent iteration
+
+Run `npm run test:ai -- <name-or-path>` for targeted unit tests or `npm run test:ai` for the whole unit suite. Do not call `vitest` or `npx vitest` directly, and do not use `npm test` for agent runs. Failure details and a short summary remain visible, followed by `[TESTS:DONE]`. It uses the existing unit configuration, timeouts, and fixtures; it does not start browser, Playwright, live, or native provider tests.
+
+Live/native provider tests, browser tests, and publishing are off-limits during agent iteration and require explicit authorization from Nicolas. `npm run check` remains the final handoff gate; `test:ai` is for development iteration. The regular `test` and `test:coverage` commands retain their existing behavior.

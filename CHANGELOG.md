@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Standardize ESM builds, installed-package verification, documentation, and release workflows.
+- Add quiet agent test runs with failure details and a completion marker.
+
 ## 0.167.0
 
 - Typed Codex app-server requests, notifications, and server-request responders using the codex-cli 0.167.0 schema.

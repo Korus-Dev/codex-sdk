@@ -612,8 +612,9 @@ describe('CodexAppServerStdioTransport', () => {
     const errors: Error[] = [];
     const delivered: unknown[] = [];
     const warnings: Error[] = [];
-    const recordWarning = (warning: Error) => warnings.push(warning);
-    process.on('warning', recordWarning);
+    const recordWarning = vi.spyOn(process, 'emitWarning').mockImplementation(warning => {
+      warnings.push(warning instanceof Error ? warning : new Error(warning));
+    });
     try {
       transport.onError((error) => errors.push(error));
       transport.onMessage(() => { throw new Error('host listener bug'); });
@@ -623,7 +624,7 @@ describe('CodexAppServerStdioTransport', () => {
       child.stdout.emit('data', '{"method":"thread/started"}\n{"method":"turn/started"}\n');
       await new Promise((resolve) => setImmediate(resolve));
     } finally {
-      process.off('warning', recordWarning);
+      recordWarning.mockRestore();
     }
 
     expect(errors).toStrictEqual([]);

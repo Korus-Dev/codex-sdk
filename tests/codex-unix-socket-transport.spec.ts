@@ -2,7 +2,7 @@ import { createServer, type Socket } from 'node:net';
 import { mkdir, mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { CodexAppServerUnixSocketTransport } from '../src';
 
 // macOS's per-user temporary path can exceed the Unix socket path limit.
@@ -277,8 +277,9 @@ describe('CodexAppServerUnixSocketTransport', () => {
     const delivered: unknown[] = [];
     const errors: Error[] = [];
     const warnings: Error[] = [];
-    const recordWarning = (warning: Error) => warnings.push(warning);
-    process.on('warning', recordWarning);
+    const recordWarning = vi.spyOn(process, 'emitWarning').mockImplementation(warning => {
+      warnings.push(warning instanceof Error ? warning : new Error(warning));
+    });
     transport.onMessage(() => { throw new Error('host listener bug'); });
     transport.onMessage((message) => delivered.push(message));
     transport.onError((error) => errors.push(error));
@@ -291,7 +292,7 @@ describe('CodexAppServerUnixSocketTransport', () => {
       expect(delivered).toStrictEqual([{ n: 1 }, { n: 2 }]);
       expect(warnings.map((warning) => warning.message)).toStrictEqual(['host listener bug', 'host listener bug']);
     } finally {
-      process.off('warning', recordWarning);
+      recordWarning.mockRestore();
       await transport.close();
       await closeServer(server);
     }

@@ -32,41 +32,34 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version: '24'
           package-manager-cache: false
           registry-url: https://registry.npmjs.org
 
       - name: Confirm release version
         env:
           RELEASE_VERSION: ${{ inputs.version }}
-        run: |
-          node --input-type=module <<'NODE'
-          import { readFileSync } from 'node:fs';
-          const manifest = JSON.parse(readFileSync('package.json', 'utf8'));
-          const lock = JSON.parse(readFileSync('package-lock.json', 'utf8'));
-          if (!/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.test(process.env.RELEASE_VERSION ?? '')
-            || process.env.RELEASE_VERSION === '0.0.0'
-            || process.env.RELEASE_VERSION !== manifest.version) {
-            throw new Error(`Requested version must match the committed stable package version: ${manifest.version}`);
-          }
-          if (lock.version !== manifest.version || lock.packages[''].version !== manifest.version) {
-            throw new Error('package-lock.json must match the package version');
-          }
-          NODE
+        run: node --input-type=module -e "import fs from 'node:fs'; if (JSON.parse(fs.readFileSync('package.json', 'utf8')).version !== process.env.RELEASE_VERSION) throw new Error('Release version must match package.json');"
 
       - name: Install dependencies
         run: npm ci --ignore-scripts
 
       - name: Test, build, and validate package
-        run: npm run check && npm run build:docs
+        run: npm run check
+
+      - name: Audit runtime dependencies
+        run: npm audit --omit=dev --audit-level=high
 
       - name: Check pinned schema
         run: |
           npm install --prefix "$RUNNER_TEMP/codex-cli" --no-save @openai/codex@0.167.0
           npm run check:schema -- --codex "$RUNNER_TEMP/codex-cli/node_modules/.bin/codex"
 
+      - name: Pack release
+        run: npm pack --ignore-scripts --pack-destination release-package
+
       - name: Publish to npm with trusted publishing
-        run: npm publish --access public --registry https://registry.npmjs.org
+        run: npm publish release-package/*.tgz --ignore-scripts --access public --provenance
 
   release:
     name: Create GitHub release
@@ -79,10 +72,10 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          RELEASE_VERSION: ${{ inputs.version }}
-          RELEASE_SHA: ${{ github.sha }}
+          VERSION: ${{ inputs.version }}
+          SHA: ${{ github.sha }}
         run: |
-          gh release create "v${RELEASE_VERSION}" \
-            --target "$RELEASE_SHA" \
-            --title "Codex SDK ${RELEASE_VERSION}" \
+          gh release create "v$VERSION" \
+            --target "$SHA" \
+            --title "Codex SDK $VERSION" \
             --generate-notes

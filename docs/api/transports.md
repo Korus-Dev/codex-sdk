@@ -11,7 +11,7 @@
 | `codexHome` | Set `CODEX_HOME` in the child environment |
 | `cwd` | Child working directory |
 | `env` | Child environment overrides, merged with the process environment |
-| `executableDiscovery` | Injectable discovery dependencies and probe timeout |
+| `executableDiscovery` | Injectable discovery dependencies and probe timeout, or `false` to skip all discovery |
 | `onExit` | Receive `{ code, signal, stderr }` when the process exits |
 | `onStderr` | Receive stderr chunks |
 | `spawnProcess` | Injectable child-process spawn implementation |
@@ -38,6 +38,8 @@ Stdio uses `resolveCodexRuntime({ command?, env?, discovery? })` to return `{ co
 5. nvm locations.
 
 A nonblank explicit command is used unchanged apart from trimming, even if discovery finds another binary. Environment augmentation still runs, supporting launchers that need Node or other tools on PATH. Without a match, the command falls back to `codex` and spawn reports any failure.
+
+To use only your controlled command and environment, set `executableDiscovery: false` on stdio, or `discovery: false` when calling `resolveCodexRuntime` directly. This skips all shell and filesystem probes and leaves PATH exactly as provided by `process.env` merged with your `env` overrides. An omitted or blank command becomes `codex`, resolved normally by process spawning against that PATH. Discovery and environment augmentation remain enabled by default.
 
 Login-shell probes run asynchronously, concurrently, and with a five-second default bound per probe. Results are cached by shell, PATH, and home for the process lifetime. Windows skips login-shell probes and considers PATHEXT executable suffixes.
 

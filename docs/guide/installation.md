@@ -1,6 +1,6 @@
 # Setup
 
-Use Node.js **26.12.1**, recorded in `.node-version`, and a separately provisioned Codex CLI. The package is private and unpublished; use the source or a local dependency through your workspace's dependency workflow.
+Use Node.js **22.19.0 or newer** to run the SDK. Development uses Node.js **26.12.1**, recorded in `.node-version`. Provision the Codex CLI separately. The package is private and unpublished; use the source or a local dependency through your workspace's dependency workflow.
 
 ```sh
 git clone git@github.com:Korus-Dev/codex-sdk.git

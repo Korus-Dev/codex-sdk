@@ -39,7 +39,8 @@ export type CodexRuntime = {
 export type ResolveCodexRuntimeOptions = {
   command?: string;
   env?: NodeJS.ProcessEnv;
-  discovery?: CodexExecutableDiscoveryDependencies;
+  /** Disable all discovery and PATH augmentation with false. */
+  discovery?: CodexExecutableDiscoveryDependencies | false;
 };
 
 type ShellProbe = {
@@ -79,6 +80,9 @@ export function withCodexRuntimePath(
  */
 export async function resolveCodexRuntime(options: ResolveCodexRuntimeOptions = {}): Promise<CodexRuntime> {
   const env = { ...process.env, ...options.env };
+  if (options.discovery === false) {
+    return { command: options.command?.trim() || 'codex', env };
+  }
   const dependencies = { ...options.discovery, env };
   const entries = runtimePathEntries(await probeLoginShell(dependencies), dependencies);
   return {

@@ -2,7 +2,7 @@
 
 Build Node.js apps on the Codex app-server with a typed JSON-RPC client, notifications, approval responses, and stdio or Unix-socket transports. The package has no runtime dependencies beyond Node.js built-ins. It is private and unpublished.
 
-Use Node.js 26.12.1 (also recorded in `.node-version`). The protocol schema is pinned to **codex-cli 0.167.0**, including experimental APIs. Access to a method still depends on the running server and its configuration.
+The supported runtime floor is Node.js 22.19.0. Development uses Node.js 26.12.1, recorded in `.node-version`. The protocol schema is pinned to **codex-cli 0.167.0**, including experimental APIs. Access to a method still depends on the running server and its configuration.
 
 ## Start a conversation
 
@@ -51,7 +51,7 @@ try {
 - `CodexAppServerStdioTransport` spawns and owns `codex app-server --listen stdio://`. Closing it stops its child. Set `codexHome`, `cwd`, `env`, and `configOverrides` explicitly for isolation or app policy. No feature overrides are implicit.
 - `CodexAppServerUnixSocketTransport({ type: 'unixSocket', socketPath })` connects to an existing server using the Codex control-socket WebSocket protocol. It never starts or stops that server. Without `socketPath`, it uses the Codex convention under `codexHome` (or the default Codex home).
 
-Stdio uses `resolveCodexRuntime()` to augment the child environment. Discovery searches macOS Codex/ChatGPT application bundles, the current PATH, a login-shell PATH, common user binary locations, and nvm locations, in that order. Login-shell probes are asynchronous, bounded (5 seconds by default), and cached. Windows skips shell probes and uses PATHEXT candidates. A nonblank `command` is used as supplied (trimmed), but environment discovery still runs to support launchers that need Node or other tools on PATH. An unresolved default falls back to `codex`; spawn reports launch failures. Discovery helpers and injectable discovery dependencies are exported from the package root.
+Stdio uses `resolveCodexRuntime()` to augment the child environment. Discovery searches macOS Codex/ChatGPT application bundles, the current PATH, a login-shell PATH, common user binary locations, and nvm locations, in that order. Login-shell probes are asynchronous, bounded (5 seconds by default), and cached. Windows skips shell probes and uses PATHEXT candidates. A nonblank `command` is used as supplied (trimmed), but environment discovery still runs by default to support launchers that need Node or other tools on PATH. Set `executableDiscovery: false` to skip every shell/filesystem probe and PATH augmentation; the command is trimmed (or defaults to `codex`) and the child receives `process.env` merged with your `env` overrides. An unresolved default falls back to `codex`; spawn reports launch failures. Discovery helpers and injectable discovery dependencies are exported from the package root.
 
 ## Diagnostics and request lifecycle
 

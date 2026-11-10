@@ -6,10 +6,16 @@ type ExecFileCallback = (error: Error | null, stdout: string) => void;
 
 const childProcess = vi.hoisted(() => ({
   execFile: vi.fn(),
+  execFileSync: vi.fn(),
   spawn: vi.fn(),
 }));
 
 vi.mock('node:child_process', () => childProcess);
+
+const filesystem = vi.hoisted(() => ({
+  existsSync: vi.fn(), readFileSync: vi.fn(), readdirSync: vi.fn(),
+}));
+vi.mock('node:fs', () => filesystem);
 
 const loginShellOutput = (file: string, args: string[], _options: unknown, callback: ExecFileCallback) => {
   callback(null, args.includes('nvm which current') ? '' : `/login-of-${file.split('/').at(-1)}`);
@@ -28,7 +34,43 @@ describe('asynchronous Codex runtime resolution', () => {
   afterEach(() => {
     vi.useRealTimers();
     childProcess.execFile.mockReset();
+    childProcess.execFileSync.mockReset();
     childProcess.spawn.mockReset();
+    for (const probe of Object.values(filesystem)) probe.mockReset();
+  });
+
+  it.each([
+    ['/absolute/codex', '/absolute/codex'],
+    ['  custom-codex  ', 'custom-codex'],
+    ['   ', 'codex'],
+    [undefined, 'codex'],
+  ])('disables every discovery probe for command %s', async (command, expected) => {
+    const callerEnv = { PATH: '/caller/bin:/caller/bin', SDK_PROBE_TEST: 'preserved' };
+    const resolved = await resolveCodexRuntime({ command, env: callerEnv, discovery: false });
+    expect(resolved).toEqual({ command: expected, env: { ...process.env, ...callerEnv } });
+    expect(childProcess.execFile).not.toHaveBeenCalled();
+    expect(childProcess.execFileSync).not.toHaveBeenCalled();
+    for (const probe of Object.values(filesystem)) expect(probe).not.toHaveBeenCalled();
+    expect(callerEnv).toEqual({ PATH: '/caller/bin:/caller/bin', SDK_PROBE_TEST: 'preserved' });
+  });
+
+  it('passes discovery opt-out through stdio without augmenting the spawn environment', async () => {
+    const child = fakeChild();
+    childProcess.spawn.mockReturnValue(child);
+    const transport = new CodexAppServerStdioTransport({
+      command: '/controlled/codex', executableDiscovery: false,
+      env: { PATH: '/controlled/bin' }, codexHome: '/controlled/home',
+    });
+    await transport.start();
+    expect(childProcess.spawn).toHaveBeenCalledWith(
+      '/controlled/codex', ['app-server', '--listen', 'stdio://'],
+      expect.objectContaining({ env: { ...process.env, PATH: '/controlled/bin', CODEX_HOME: '/controlled/home' } }),
+    );
+    expect(childProcess.execFile).not.toHaveBeenCalled();
+    expect(childProcess.execFileSync).not.toHaveBeenCalled();
+    for (const probe of Object.values(filesystem)) expect(probe).not.toHaveBeenCalled();
+    child.emit('exit', 0, null);
+    await transport.close();
   });
 
   it('probes the login shell without blocking and reuses the result for later connections', async () => {

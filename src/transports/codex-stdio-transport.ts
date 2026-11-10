@@ -20,7 +20,8 @@ export type CodexAppServerStdioTransportOptions = {
   codexHome?: string;
   cwd?: string;
   env?: NodeJS.ProcessEnv;
-  executableDiscovery?: CodexExecutableDiscoveryDependencies;
+  /** False disables shell/filesystem discovery and preserves the merged environment's PATH. */
+  executableDiscovery?: CodexExecutableDiscoveryDependencies | false;
   onExit?: (exit: CodexAppServerExit) => void;
   onStderr?: (text: string) => void;
   spawnProcess?: typeof spawn;

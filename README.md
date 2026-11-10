@@ -81,6 +81,10 @@ import type { CodexAppServerMethodMap } from 'codex-sdk/protocol/method-map';
 
 Use `import type` for these paths; there is no runtime module for generated types.
 
+## Documentation
+
+Read the [guide](docs/guide/index.md) and [API reference](docs/api/index.md), or run `npm run dev:docs` for the VitePress site. `npm run build:docs` validates and builds it locally.
+
 ## Develop and regenerate
 
 Package-local tooling versions are declared in `devDependencies`. Install through the containing workspace's dependency workflow, then use `npm run typecheck`, `npm run typecheck:tests`, and `npm test`. `npm run test:coverage` retains the 85% statement gate. `npm run build` emits ESM and declarations under `dist/`.

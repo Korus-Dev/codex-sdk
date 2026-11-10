@@ -59,7 +59,7 @@ jobs:
         run: npm pack --ignore-scripts --pack-destination release-package
 
       - name: Publish to npm with trusted publishing
-        run: npm publish release-package/*.tgz --ignore-scripts --access public --provenance
+        run: npm publish ./release-package/*.tgz --ignore-scripts --access public --provenance
 
   release:
     name: Create GitHub release

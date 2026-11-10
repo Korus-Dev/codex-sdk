@@ -37,57 +37,37 @@ The generated protocol targets **Codex CLI 0.167.0**, including experimental API
 
 ## Your first conversation
 
-This example streams a reply, declines command approvals, and closes the app-server when finished. Set `command` to your Codex executable, or omit it to use executable discovery. Authenticate Codex before running a model turn.
+With Codex installed and authenticated, stream your first reply:
 
 ```ts
 import { CodexAppServerClient, CodexAppServerStdioTransport } from '@korus-dev/codex-sdk';
 
-const client = new CodexAppServerClient(new CodexAppServerStdioTransport({
-  command: '/absolute/path/to/codex',
-  cwd: process.cwd(),
-  configOverrides: [],
-}));
+const client = new CodexAppServerClient(new CodexAppServerStdioTransport());
 client.onNotification('item/agentMessage/delta', ({ params }) => {
   process.stdout.write(params.delta);
-});
-client.onServerRequest('item/commandExecution/requestApproval', (_request, responder) => {
-  responder.resolve({ decision: 'decline' });
 });
 
 await client.start();
 try {
   await client.initialize({
-    clientInfo: { name: 'my_app', title: 'My App', version: '1.0.0' },
-    capabilities: { experimentalApi: true, requestAttestation: false },
+    clientInfo: { name: 'hello_codex', title: null, version: '1.0.0' },
+    capabilities: null,
   });
-  const { thread } = await client.request('thread/start', { cwd: process.cwd() });
-  const { promise: completed, resolve, reject } = Promise.withResolvers<void>();
-  const unsubscribeCompleted = client.onNotification('turn/completed', ({ params }) => {
-    if (params.threadId !== thread.id) return;
-    if (params.turn.status === 'completed') resolve();
-    else reject(new Error(`Turn ended: ${params.turn.status}`));
+  const { thread } = await client.request('thread/start', {});
+  const finished = new Promise<void>(resolve => {
+    client.onNotification('turn/completed', () => resolve());
   });
-  const unsubscribeDisconnect = client.onDisconnect(reject);
-  const deadline = setTimeout(() => reject(new Error('Turn completion timed out')), 300_000);
-  // Observe rejection even if the connection drops before turn/start responds.
-  void completed.catch(() => undefined);
-  try {
-    await client.request('turn/start', {
-      threadId: thread.id,
-      input: [{ type: 'text', text: 'Explain this project.', text_elements: [] }],
-    });
-    await completed;
-  } finally {
-    clearTimeout(deadline);
-    unsubscribeCompleted();
-    unsubscribeDisconnect();
-  }
+  await client.request('turn/start', {
+    threadId: thread.id,
+    input: [{ type: 'text', text: 'Say hello!', text_elements: [] }],
+  });
+  await finished;
 } finally {
   await client.close();
 }
 ```
 
-The client initializes the connection, correlates responses, and routes events. Your application owns approval decisions, conversation state, persistence, and reconnection.
+The SDK finds Codex automatically and uses your current directory. See the [full conversation guide](https://korus-dev.github.io/codex-sdk/guide/quick-start.html) for approvals, deadlines, and connection recovery.
 
 ## Connect your way
 

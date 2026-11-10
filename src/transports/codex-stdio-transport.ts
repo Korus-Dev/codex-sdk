@@ -15,6 +15,7 @@ export type CodexAppServerExit = {
 
 export type CodexAppServerStdioTransportOptions = {
   command?: string;
+  /** Caller-owned Codex -c overrides, passed in order. No implicit feature flags. */
   configOverrides?: string[];
   codexHome?: string;
   cwd?: string;
@@ -29,7 +30,6 @@ export type CodexAppServerStdioTransportOptions = {
 };
 
 const DEFAULT_DIAGNOSTIC_BUFFER_CHARS = 64 * 1024;
-const DEFAULT_CONFIG_OVERRIDES = ['features.default_mode_request_user_input=true'];
 const DEFAULT_OUTPUT_LINE_CHARS = Math.min(
   256 * 1024 * 1024,
   Math.floor(bufferConstants.MAX_STRING_LENGTH / 2),
@@ -65,10 +65,7 @@ export class CodexAppServerStdioTransport implements RpcTransport {
     if (generation !== this.generation) {
       throw new Error('Codex app-server transport was closed while starting');
     }
-    const configArgs = [
-      ...DEFAULT_CONFIG_OVERRIDES,
-      ...(this.options.configOverrides ?? []),
-    ].flatMap((override) => ['-c', override]);
+    const configArgs = (this.options.configOverrides ?? []).flatMap((override) => ['-c', override]);
     const args = [...configArgs, 'app-server', '--listen', 'stdio://'];
     const processEnv = {
       ...env,

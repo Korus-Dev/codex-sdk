@@ -5,13 +5,17 @@
   "license": "Apache-2.0",
   "files": [
     "dist",
-    "LICENSE"
+    "LICENSE",
+    "README.md"
   ],
   "scripts": {
     "build": "vite build && tsc -p tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "generate:schema": "node scripts/generate-codex-schema.mjs",
+    "check:schema": "node scripts/generate-codex-schema.mjs --check",
+    "typecheck:tests": "tsc -p tsconfig.tests.json --noEmit"
   },
   "name": "codex-sdk",
   "exports": {
@@ -21,6 +25,38 @@
     },
     "./protocol/*": {
       "types": "./dist/protocol/*.d.ts"
+    },
+    "./protocol": {
+      "types": "./dist/protocol/index.d.ts",
+      "import": "./dist/protocol/index.js"
+    },
+    "./protocol/client": {
+      "types": "./dist/protocol/client.d.ts",
+      "import": "./dist/protocol/client.js"
+    },
+    "./protocol/wire": {
+      "types": "./dist/protocol/wire.d.ts",
+      "import": "./dist/protocol/wire.js"
+    },
+    "./protocol/schema-version": {
+      "types": "./dist/protocol/schema-version.d.ts",
+      "import": "./dist/protocol/schema-version.js"
+    },
+    "./protocol/listener-errors": {
+      "types": "./dist/protocol/listener-errors.d.ts",
+      "import": "./dist/protocol/listener-errors.js"
     }
+  },
+  "description": "Typed Codex app-server JSON-RPC client and Node.js transports.",
+  "engines": {
+    "node": ">=26.12.1 <27"
+  },
+  "sideEffects": false,
+  "devDependencies": {
+    "@types/node": "25.9.5",
+    "@vitest/coverage-v8": "4.1.10",
+    "typescript": "6.0.3",
+    "vite": "8.1.5",
+    "vitest": "4.1.10"
   }
 }

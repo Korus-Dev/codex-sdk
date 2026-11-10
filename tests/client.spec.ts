@@ -48,19 +48,100 @@ class FakeTransport implements RpcTransport {
 }
 
 describe('CodexAppServerClient', () => {
-  it.each([undefined, '0', '1'])('emits conversation timings only for an explicit opt-in (%s)', async flag => {
-    vi.stubEnv('NODE_ENV', 'development');
-    vi.stubEnv('CODEX_APP_SDK_TRACE_CONVERSATION_LOAD', flag);
-    const warning = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+  it.each(['ok', 'error', 'timeout'] as const)('reports %s request settlement exactly once', async outcome => {
+    vi.useFakeTimers();
+    const onRequestSettled = vi.fn();
     const transport = new FakeTransport();
-    const client = new CodexAppServerClient(transport);
+    const client = new CodexAppServerClient(transport, { requestTimeoutMs: 25, onRequestSettled });
+    await client.start();
+    const before = performance.timeOrigin + performance.now();
+    const result = client.request('configRequirements/read').catch(error => error);
+    if (outcome === 'ok') transport.receive({ id: 1, result: { requirements: null } });
+    else if (outcome === 'error') transport.receive({ id: 1, error: { code: -1, message: 'failed' } });
+    else await vi.advanceTimersByTimeAsync(25);
+    await result;
+    transport.receive({ id: 1, result: { requirements: null } });
+    await client.close();
+    expect(onRequestSettled).toHaveBeenCalledTimes(1);
+    expect(onRequestSettled).toHaveBeenCalledWith({
+      id: 1, method: 'configRequirements/read', outcome,
+      startedAt: expect.any(Number), durationMs: expect.any(Number),
+    });
+    const info = onRequestSettled.mock.calls[0]![0];
+    expect(info.startedAt).toBeGreaterThanOrEqual(before);
+    expect(info.durationMs).toBeGreaterThanOrEqual(0);
+  });
+
+  it.each(['send', 'protocol', 'disconnect', 'close'] as const)('isolates hook exceptions on %s failure', async failure => {
+    const hookError = new Error('diagnostics failed');
+    const onRequestSettled = vi.fn(() => { throw hookError; });
+    const onListenerError = vi.fn(() => { throw new Error('reporting failed too'); });
+    const transport = new FakeTransport();
+    const client = new CodexAppServerClient(transport, { onRequestSettled, onListenerError });
+    await client.start();
+    if (failure === 'send') vi.spyOn(transport, 'send').mockImplementation(() => { throw new Error('write failed'); });
+    const result = client.request('configRequirements/read').catch(error => error);
+    if (failure === 'protocol') transport.fail(new RpcTransportProtocolError('bad protocol'));
+    if (failure === 'disconnect') transport.fail(new Error('disconnected'));
+    if (failure === 'close') await client.close();
+    expect(await result).toBeInstanceOf(Error);
+    expect(onRequestSettled).toHaveBeenCalledTimes(1);
+    expect(onRequestSettled.mock.calls[0]).toEqual([expect.objectContaining({ outcome: 'error' })]);
+    expect(onListenerError).toHaveBeenCalledWith(hookError);
+    await client.close();
+  });
+
+  it('uses a monotonic duration and an epoch start time', async () => {
+    const clock = vi.spyOn(performance, 'now').mockReturnValueOnce(100).mockReturnValueOnce(137);
+    const onRequestSettled = vi.fn();
+    const transport = new FakeTransport();
+    const client = new CodexAppServerClient(transport, { onRequestSettled });
     try {
+      expect(() => client.request('configRequirements/read')).toThrow('not started');
+      expect(onRequestSettled).not.toHaveBeenCalled();
       await client.start();
-      const result = client.request('model/list', { cursor: null, limit: null, includeHidden: false });
-      transport.receive({ id: 1, result: { data: [], nextCursor: null } });
-      await expect(result).resolves.toStrictEqual({ data: [], nextCursor: null });
-      expect(warning.mock.calls.some(([value]) => String(value).startsWith('[conversation-load]'))).toBe(flag === '1');
-    } finally { await client.close(); warning.mockRestore(); vi.unstubAllEnvs(); }
+      const result = client.request('configRequirements/read');
+      transport.receive({ id: 1, result: { requirements: null } });
+      await result;
+      expect(onRequestSettled).toHaveBeenCalledWith({
+        id: 1, method: 'configRequirements/read', outcome: 'ok',
+        startedAt: performance.timeOrigin + 100, durationMs: 37,
+      });
+    } finally { clock.mockRestore(); await client.close(); }
+  });
+
+  it('clears pending work before a hook can re-enter close', async () => {
+    const transport = new FakeTransport();
+    const onRequestSettled = vi.fn(() => { void client.close(); });
+    const client = new CodexAppServerClient(transport, { onRequestSettled });
+    await client.start();
+    const first = client.request('configRequirements/read').catch(error => error);
+    const second = client.request('configRequirements/read').catch(error => error);
+    await client.close();
+    expect(await first).toBeInstanceOf(Error);
+    expect(await second).toBeInstanceOf(Error);
+    expect(onRequestSettled).toHaveBeenCalledTimes(2);
+  });
+
+  it.each(['ok', 'timeout'] as const)('isolates hook exceptions on %s settlement', async outcome => {
+    vi.useFakeTimers();
+    const transport = new FakeTransport();
+    const onListenerError = vi.fn();
+    const client = new CodexAppServerClient(transport, {
+      requestTimeoutMs: 25, onRequestSettled: () => { throw new Error('hook failed'); }, onListenerError,
+    });
+    await client.start();
+    const result = client.request('configRequirements/read');
+    if (outcome === 'ok') {
+      transport.receive({ id: 1, result: { requirements: null } });
+      await expect(result).resolves.toEqual({ requirements: null });
+    } else {
+      const rejected = expect(result).rejects.toThrow('timed out');
+      await vi.advanceTimersByTimeAsync(25);
+      await rejected;
+    }
+    expect(onListenerError).toHaveBeenCalledOnce();
+    await client.close();
   });
   afterEach(() => {
     vi.useRealTimers();

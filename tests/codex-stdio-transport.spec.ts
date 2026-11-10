@@ -61,7 +61,7 @@ describe('CodexAppServerStdioTransport', () => {
     const transport = new CodexAppServerStdioTransport({
       codexHome: '/tmp/codex-home',
       command: 'custom-codex',
-      configOverrides: ['features.apps=true'],
+      configOverrides: ['features.apps=true', 'features.default_mode_request_user_input=true'],
       cwd: '/tmp/project',
       env: { SURFACE_TEST: 'yes' },
       executableDiscovery: {
@@ -79,9 +79,9 @@ describe('CodexAppServerStdioTransport', () => {
       'custom-codex',
       [
         '-c',
-        'features.default_mode_request_user_input=true',
-        '-c',
         'features.apps=true',
+        '-c',
+        'features.default_mode_request_user_input=true',
         'app-server',
         '--listen',
         'stdio://',
@@ -260,7 +260,7 @@ describe('CodexAppServerStdioTransport', () => {
 
     expect(spawnMock).toHaveBeenLastCalledWith(
       'codex',
-      ['-c', 'features.default_mode_request_user_input=true', 'app-server', '--listen', 'stdio://'],
+      ['app-server', '--listen', 'stdio://'],
       expect.any(Object),
     );
     expect(replacement.stdin.end).toHaveBeenCalledOnce();

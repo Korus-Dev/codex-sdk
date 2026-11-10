@@ -1,6 +1,7 @@
 export {
   CodexAppServerClient,
   type CodexAppServerClientOptions,
+  type CodexRequestSettledInfo,
   type CodexServerRequestResponder,
   type UntypedCodexServerRequestResponder,
 } from './client';

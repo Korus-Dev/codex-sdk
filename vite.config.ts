@@ -1,13 +1,10 @@
 import { defineConfig } from 'vite';
 import path from 'node:path';
 
-const entries = ['index', 'protocol/index', 'protocol/client', 'protocol/wire',
-  'protocol/schema-version', 'protocol/listener-errors'];
-
 export default defineConfig({
   build: {
     lib: {
-      entry: Object.fromEntries(entries.map(name => [name, path.resolve(import.meta.dirname, `src/${name}.ts`)])),
+      entry: path.resolve(import.meta.dirname, 'src/index.ts'),
       formats: ['es'],
     },
     sourcemap: true,

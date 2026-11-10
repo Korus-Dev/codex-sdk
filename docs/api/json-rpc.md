@@ -310,4 +310,4 @@ Run `npm run generate:rpc` after schema regeneration. `npm run check:rpc` detect
 | `applyPatchApproval` | `ApplyPatchApprovalParams` | `ApplyPatchApprovalResponse` |
 | `execCommandApproval` | `ExecCommandApprovalParams` | `ExecCommandApprovalResponse` |
 
-Parameter and result names refer to exported generated protocol types. Import them from `@korus-dev/codex-sdk` or the [types-only subpaths](/api/#types-only-subpaths). The client routes these messages; your app owns their presentation, approval policy, and any state derived from notifications.
+Parameter and result names refer to generated protocol types. Import top-level types and the type-only `v2` namespace from `@korus-dev/codex-sdk`; see [generated types](/api/#generated-types). The client routes these messages; your app owns their presentation, approval policy, and any state derived from notifications.

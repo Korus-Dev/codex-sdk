@@ -7,5 +7,3 @@ coverage/
 docs/.vitepress/cache/
 
 .env
-
-.sdk-typecheck-*/

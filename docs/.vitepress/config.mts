@@ -1,16 +1,18 @@
 import { defineConfig } from 'vitepress';
 
+const base = process.env.DOCS_BASE ?? '/';
+
 export default defineConfig({
   title: 'Codex SDK',
   titleTemplate: ':title · Codex SDK',
   description: 'Build apps on Codex with a typed app-server client and Node.js transports.',
   lang: 'en-US',
-  base: '/',
+  base,
   cleanUrls: false,
   lastUpdated: true,
   head: [
     ['meta', { name: 'theme-color', content: '#0b7a65' }],
-    ['link', { rel: 'icon', href: '/logo.svg', type: 'image/svg+xml' }],
+    ['link', { rel: 'icon', href: `${base}logo.svg`, type: 'image/svg+xml' }],
   ],
   themeConfig: {
     logo: '/logo.svg',
@@ -32,6 +34,7 @@ export default defineConfig({
           { text: 'Authentication', link: '/guide/authentication' },
           { text: 'Approvals and tools', link: '/guide/extensions' },
           { text: 'MCP servers', link: '/guide/mcp' },
+          { text: 'Remote control', link: '/guide/remote-control' },
           { text: 'Host security', link: '/guide/security' },
           { text: 'Troubleshooting', link: '/guide/troubleshooting' },
         ] },
@@ -44,6 +47,7 @@ export default defineConfig({
         { text: 'Exports', link: '/api/' },
         { text: 'Client', link: '/api/codex' },
         { text: 'Transports and discovery', link: '/api/transports' },
+        { text: 'Wire types and errors', link: '/api/wire' },
         { text: 'Protocol inventory', link: '/api/json-rpc' },
       ] }],
     },

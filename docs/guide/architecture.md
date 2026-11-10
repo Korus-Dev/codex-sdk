@@ -13,3 +13,5 @@ The stdio transport owns its spawned process. The Unix-socket transport connects
 Generated types and method maps describe Codex's wire protocol. The client does not reduce notifications into conversation snapshots or automatically reload history. Your app determines which threads to load, how to display incremental output, and when to reconnect.
 
 Keep the client in a trusted Node.js host. If your UI runs in another process or browser, expose the actions and data that your app needs through an app-owned boundary.
+
+The package uses a root ESM entry point and TypeScript declarations, built with Vite and `tsc`. TypeScript consumers use Bundler module resolution.

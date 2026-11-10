@@ -1,24 +1,48 @@
-# codex-sdk
+# Codex SDK
 
-Build Node.js apps on the Codex app-server with a typed JSON-RPC client, notifications, approval responses, and stdio or Unix-socket transports. The package has no runtime dependencies beyond Node.js built-ins.
+**Build Node.js applications on the Codex app-server.**
 
-The supported runtime floor is Node.js 22.19.0. Development uses Node.js 26.12.1, recorded in `.node-version`. The protocol schema is pinned to **codex-cli 0.167.0**, including experimental APIs. Access to a method still depends on the running server and its configuration.
+A typed TypeScript client for streaming conversations, responding to approvals, and connecting your tools to Codex. Bring your own application state and interface—the SDK handles the protocol and connection.
 
-## Start a conversation
+[Documentation](https://korus-dev.github.io/codex-sdk/) · [Getting started](https://korus-dev.github.io/codex-sdk/guide/quick-start.html) · [API reference](https://korus-dev.github.io/codex-sdk/api/) · [Contributing](CONTRIBUTING.md)
+
+## What you get
+
+- **Typed requests and events.** Parameters, results, notifications, and tool responses follow the Codex app-server schema.
+- **Streaming conversations.** Start and resume threads, submit turns, and receive incremental output.
+- **Approvals and tools.** Respond to server requests with your application's authorization policy.
+- **Two ways to connect.** Launch an app-server over stdio or attach to an existing Unix control socket.
+- **Request diagnostics.** Observe outcomes and timings without collecting protocol payloads.
+- **Zero runtime dependencies.** ESM built on Node.js, with TypeScript declarations for bundler-based projects.
+
+This is an independently maintained SDK, separate from OpenAI's official SDKs.
+
+## Install
+
+```sh
+npm install @korus-dev/codex-sdk
+```
+
+Requires **Node.js 22.19.0 or newer** and a separately installed Codex CLI. TypeScript projects also need `@types/node`. Use ESM (`"type": "module"` in your app's `package.json`).
+
+The generated protocol targets **Codex CLI 0.167.0**, including experimental APIs. Feature availability depends on the running server and its configuration.
+
+## Your first conversation
+
+This example streams a reply, declines command approvals, and closes the app-server when finished. Set `command` to your Codex executable, or omit it to use executable discovery. Authenticate Codex before running a model turn.
 
 ```ts
 import { CodexAppServerClient, CodexAppServerStdioTransport } from '@korus-dev/codex-sdk';
 
-const transport = new CodexAppServerStdioTransport({
+const client = new CodexAppServerClient(new CodexAppServerStdioTransport({
   command: '/absolute/path/to/codex',
   cwd: process.cwd(),
-  // Only caller-supplied overrides are passed as -c arguments, in order.
   configOverrides: [],
+}));
+client.onNotification('item/agentMessage/delta', ({ params }) => {
+  process.stdout.write(params.delta);
 });
-const client = new CodexAppServerClient(transport);
-client.onNotification(notification => console.log(notification));
 client.onServerRequest('item/commandExecution/requestApproval', (_request, responder) => {
-  // Replace this policy with your app's approval UI.
   responder.resolve({ decision: 'decline' });
 });
 
@@ -29,83 +53,70 @@ try {
     capabilities: { experimentalApi: true, requestAttestation: false },
   });
   const { thread } = await client.request('thread/start', { cwd: process.cwd() });
-  const completed = new Promise<void>(resolve => {
-    const unsubscribe = client.onNotification('turn/completed', event => {
-      if (event.params.threadId === thread.id) { unsubscribe(); resolve(); }
+  const { promise: completed, resolve, reject } = Promise.withResolvers<void>();
+  const unsubscribeCompleted = client.onNotification('turn/completed', ({ params }) => {
+    if (params.threadId !== thread.id) return;
+    if (params.turn.status === 'completed') resolve();
+    else reject(new Error(`Turn ended: ${params.turn.status}`));
+  });
+  const unsubscribeDisconnect = client.onDisconnect(reject);
+  const deadline = setTimeout(() => reject(new Error('Turn completion timed out')), 300_000);
+  // Observe rejection even if the connection drops before turn/start responds.
+  void completed.catch(() => undefined);
+  try {
+    await client.request('turn/start', {
+      threadId: thread.id,
+      input: [{ type: 'text', text: 'Explain this project.', text_elements: [] }],
     });
-  });
-  await client.request('turn/start', {
-    threadId: thread.id,
-    input: [{ type: 'text', text: 'Explain this project.', text_elements: [] }],
-  });
-  await completed;
+    await completed;
+  } finally {
+    clearTimeout(deadline);
+    unsubscribeCompleted();
+    unsubscribeDisconnect();
+  }
 } finally {
   await client.close();
 }
 ```
 
-`initialize()` sends the required `initialized` notification once per connection. Register handlers before starting requests. Unhandled server requests receive a method-not-implemented error. A production app should also handle disconnection and impose its own turn-completion deadline.
+The client initializes the connection, correlates responses, and routes events. Your application owns approval decisions, conversation state, persistence, and reconnection.
 
-## Choose a transport
+## Connect your way
 
-- `CodexAppServerStdioTransport` spawns and owns `codex app-server --listen stdio://`. Closing it stops its child. Set `codexHome`, `cwd`, `env`, and `configOverrides` explicitly for isolation or app policy. No feature overrides are implicit.
-- `CodexAppServerUnixSocketTransport({ type: 'unixSocket', socketPath })` connects to an existing server using the Codex control-socket WebSocket protocol. It never starts or stops that server. Without `socketPath`, it uses the Codex convention under `codexHome` (or the default Codex home).
+| Transport | Use it when | Lifecycle |
+| --- | --- | --- |
+| `CodexAppServerStdioTransport` | Your app should launch its own Codex process | Closing the transport stops its child |
+| `CodexAppServerUnixSocketTransport` | An app-server is already running | Closing disconnects this client and leaves the server running |
 
-Stdio uses `resolveCodexRuntime()` to augment the child environment. Discovery searches macOS Codex/ChatGPT application bundles, the current PATH, a login-shell PATH, common user binary locations, and nvm locations, in that order. Login-shell probes are asynchronous, bounded (5 seconds by default), and cached. Windows skips shell probes and uses PATHEXT candidates. A nonblank `command` is used as supplied (trimmed), but environment discovery still runs by default to support launchers that need Node or other tools on PATH. Set `executableDiscovery: false` to skip every shell/filesystem probe and PATH augmentation; the command is trimmed (or defaults to `codex`) and the child receives `process.env` merged with your `env` overrides. An unresolved default falls back to `codex`; spawn reports launch failures. Discovery helpers and injectable discovery dependencies are exported from the package root.
+Configure `command`, `cwd`, `codexHome`, environment variables, and Codex overrides in your trusted Node.js host. There are no implicit feature flags. Set `executableDiscovery: false` when you want only your supplied command and environment.
 
-## Diagnostics and request lifecycle
+See [transports and executable discovery](https://korus-dev.github.io/codex-sdk/api/transports.html) for configuration and custom transports.
 
-Pass `onRequestSettled` in `CodexAppServerClientOptions` to collect request timings:
+## Go further
 
-```ts
-const client = new CodexAppServerClient(transport, {
-  onRequestSettled(info) {
-    // info: CodexRequestSettledInfo
-    // { id, method, outcome: 'ok' | 'error' | 'timeout', startedAt, durationMs }
-    console.log(info);
-  },
-  onListenerError(error) { console.error(error); },
-});
-```
+| Build | Guide |
+| --- | --- |
+| History and conversation recovery | [Threads and turns](https://korus-dev.github.io/codex-sdk/guide/conversations.html) |
+| Account and sign-in flows | [Authentication](https://korus-dev.github.io/codex-sdk/guide/authentication.html) |
+| App-owned tools and approval handling | [Approvals and tools](https://korus-dev.github.io/codex-sdk/guide/extensions.html) |
+| External tool services | [MCP servers](https://korus-dev.github.io/codex-sdk/guide/mcp.html) |
+| Pairing and remote connections | [Remote control](https://korus-dev.github.io/codex-sdk/guide/remote-control.html) |
+| Every typed protocol method | [Protocol inventory](https://korus-dev.github.io/codex-sdk/api/json-rpc.html) |
 
-The synchronous hook runs once per admitted outgoing request, including send, remote, protocol, disconnect, and close errors. Calls rejected before the client starts do not enter the hook. `startedAt` is epoch milliseconds; `durationMs` uses a monotonic clock. Payloads are excluded. Hook exceptions go to `onListenerError` (a process warning by default) and cannot change request settlement. No diagnostic environment flags are read. Requests default to 15 seconds, with 120 seconds for `thread/revert`; `requestTimeoutMs` overrides both.
+Import runtime APIs and types from `@korus-dev/codex-sdk`. See the [export reference](https://korus-dev.github.io/codex-sdk/api/) for the complete API and generated types.
 
-## Imports
-
-The root exports runtime APIs and generated types. Runtime subpaths are `@korus-dev/codex-sdk/protocol`, `/protocol/client`, `/protocol/wire`, `/protocol/schema-version`, and `/protocol/listener-errors`. Generated declarations and method maps are deliberately **types-only**:
-
-```ts
-import type { Thread } from '@korus-dev/codex-sdk/protocol/generated/v2/Thread';
-import type { CodexAppServerMethodMap } from '@korus-dev/codex-sdk/protocol/method-map';
-```
-
-Use `import type` for these paths; there is no runtime module for generated types.
-
-## Documentation
-
-Read the [guide](docs/guide/index.md) and [API reference](docs/api/index.md), or run `npm run dev:docs` for the VitePress site. `npm run build:docs` validates and builds it locally.
-
-## Develop and regenerate
-
-Package-local tooling versions are declared in `devDependencies`. Run `npm ci` in this repository, then use `npm run typecheck`, `npm run typecheck:tests`, and `npm test`. `npm run test:coverage` retains the 85% statement gate. `npm run build` emits ESM and declarations under `dist/`.
-
-With a matching Codex CLI available:
+## Development
 
 ```sh
-npm run check:schema -- --codex /absolute/path/to/pinned/codex
-npm run generate:schema -- --codex /absolute/path/to/pinned/codex
+npm ci
+npm run check
+npm run build:docs
 ```
 
-The generator checks the CLI version against `src/protocol/schema-version.ts` before generating files. It runs `app-server generate-ts --experimental`, rebuilds both request maps, and compares the complete generated file set in check mode. These commands generate schema locally; they do not run a provider turn.
+Development uses Node.js 26.12.1, pinned in `.node-version`. `check` runs typechecks, tests with coverage, the package build, and an npm pack dry run. Preview the VitePress documentation with `npm run dev:docs`.
 
-To upgrade, obtain the intended CLI and explicitly select its version:
+See [CONTRIBUTING.md](CONTRIBUTING.md) and the [development guide](docs/guide/development.md) for schema generation, CLI verification, and release workflows.
 
-```sh
-npm run generate:schema -- --codex /path/to/new/codex --expected-version 'codex-cli X.Y.Z'
-```
+## License and security
 
-Review generated types, both method maps, and the schema version together; run the typechecks, tests, build, and `check:schema` with that CLI. The CLI must be provisioned separately; the generator never downloads or installs it.
-
-## Local development
-
-Install dependencies with `npm ci` in this repository. npm packages are used by default. Set `SDK_LOCAL_SOURCE=1` in `.env` to run dependency source from sibling SDK repositories; `SDK_SOURCE_ROOT` can point to another directory containing `codex-sdk`, `multi-agent-sdk` and `agent-ui-sdk`. Build local dependencies first, in that order. Vite and tests use live source; typechecking uses the local builds’ declarations. `SDK_LOCAL_SOURCE=0` explicitly selects installed npm packages.
+Released under [Apache-2.0](LICENSE). See [CHANGELOG.md](CHANGELOG.md) for release notes and [SECURITY.md](SECURITY.md) to report vulnerabilities privately.

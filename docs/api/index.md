@@ -1,31 +1,44 @@
-# Exports
+# Public API
 
-Import client, transports, executable discovery, wire types and errors, listener helpers, and generated protocol types from `@korus-dev/codex-sdk`.
-
-## Runtime entry points
-
-| Import | Exports |
-| --- | --- |
-| `@korus-dev/codex-sdk` | Complete public API |
-| `@korus-dev/codex-sdk/protocol` | Client, protocol types, method maps, wire helpers, schema version |
-| `@korus-dev/codex-sdk/protocol/client` | `CodexAppServerClient` and its option/responder types |
-| `@korus-dev/codex-sdk/protocol/wire` | `RpcRemoteError`, `RpcTransportProtocolError`, `isRecord`, `isRpcError`, wire types |
-| `@korus-dev/codex-sdk/protocol/schema-version` | `codexSchemaCliVersion` |
-| `@korus-dev/codex-sdk/protocol/listener-errors` | `notifyListeners`, `reportListenerError`, `ListenerErrorHandler` |
-
-The root exports `notifyListeners` and `ListenerErrorHandler`; use the listener-errors subpath for `reportListenerError`.
-
-## Types-only subpaths
-
-Generated declarations and method maps intentionally have no runtime entry:
+Import runtime APIs and types from `@korus-dev/codex-sdk`. The package uses `main` for its ESM entry point and `types` for declarations.
 
 ```ts
-import type { Thread } from '@korus-dev/codex-sdk/protocol/generated/v2/Thread';
-import type { CodexAppServerMethodMap } from '@korus-dev/codex-sdk/protocol/method-map';
-import type { CodexServerRequestMethodMap } from '@korus-dev/codex-sdk/protocol/server-request-map';
+import {
+  CodexAppServerClient,
+  CodexAppServerStdioTransport,
+  codexSchemaCliVersion,
+  type CodexAppServerMethodMap,
+  type CodexServerRequestMethodMap,
+  type ResponseItem,
+  type v2,
+} from '@korus-dev/codex-sdk';
 ```
 
-Use `import type`. The wildcard `@korus-dev/codex-sdk/protocol/*` resolves declarations, while explicitly listed runtime entries above also resolve ESM.
+## Runtime exports
+
+| Area | Exports |
+| --- | --- |
+| Client | `CodexAppServerClient` |
+| Transports | `CodexAppServerStdioTransport`, `CodexAppServerUnixSocketTransport` |
+| Discovery | `resolveCodexRuntime`, `discoverCodexExecutable`, `codexRuntimePathEntries`, `withCodexRuntimePath` |
+| Wire helpers | `RpcRemoteError`, `RpcTransportProtocolError`, `isRecord`, `isRpcError` |
+| Listener helpers | `notifyListeners`, `reportListenerError` |
+| Schema | `codexSchemaCliVersion` |
+
+See [client](/api/codex), [transports](/api/transports), and [wire types and errors](/api/wire) for their contracts.
+
+## Generated types
+
+Top-level protocol types such as `ResponseItem`, both method maps, client options, transport options, responders, and wire types are available at the root. Version 2 protocol types are available through the type-only `v2` namespace:
+
+```ts
+import type { v2, CodexAppServerMethodMap } from '@korus-dev/codex-sdk';
+
+type Thread = v2.Thread;
+type StartThread = CodexAppServerMethodMap['thread/start']['params'];
+```
+
+Use `import type` for generated types; they have no runtime values. TypeScript projects use `module: "ESNext"` and `moduleResolution: "Bundler"`. Import through the package root instead of depending on internal file paths.
 
 ## Protocol compatibility
 

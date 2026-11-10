@@ -1,5 +1,5 @@
 {
-  "version": "0.0.0",
+  "version": "0.167.0",
   "type": "module",
   "license": "Apache-2.0",
   "files": [
@@ -8,50 +8,23 @@
     "README.md"
   ],
   "scripts": {
-    "build": "vite build && node scripts/typecheck.mjs plain -p tsconfig.build.json",
-    "typecheck": "node scripts/typecheck.mjs plain --noEmit",
+    "build": "vite build && tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "generate:schema": "node scripts/generate-codex-schema.mjs",
     "check:schema": "node scripts/generate-codex-schema.mjs --check",
-    "typecheck:tests": "node scripts/typecheck.mjs plain -p tsconfig.tests.json --noEmit",
+    "typecheck:tests": "tsc -p tsconfig.tests.json --noEmit",
     "dev:docs": "vitepress dev docs --port 5175",
     "build:docs": "npm run check:rpc && npm run typecheck:docs && vitepress build docs",
     "preview:docs": "vitepress preview docs --port 4175",
     "generate:rpc": "node scripts/generate-protocol-docs.mjs",
     "check:rpc": "node scripts/generate-protocol-docs.mjs --check",
-    "typecheck:docs": "tsc -p tsconfig.docs.json --noEmit"
+    "typecheck:docs": "tsc -p tsconfig.docs.json --noEmit",
+    "check": "npm run typecheck && npm run typecheck:tests && npm run test:coverage && npm run build && npm pack --dry-run --ignore-scripts --loglevel=error",
+    "prepack": "npm run build"
   },
   "name": "@korus-dev/codex-sdk",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    },
-    "./protocol/*": {
-      "types": "./dist/protocol/*.d.ts"
-    },
-    "./protocol": {
-      "types": "./dist/protocol/index.d.ts",
-      "import": "./dist/protocol/index.js"
-    },
-    "./protocol/client": {
-      "types": "./dist/protocol/client.d.ts",
-      "import": "./dist/protocol/client.js"
-    },
-    "./protocol/wire": {
-      "types": "./dist/protocol/wire.d.ts",
-      "import": "./dist/protocol/wire.js"
-    },
-    "./protocol/schema-version": {
-      "types": "./dist/protocol/schema-version.d.ts",
-      "import": "./dist/protocol/schema-version.js"
-    },
-    "./protocol/listener-errors": {
-      "types": "./dist/protocol/listener-errors.d.ts",
-      "import": "./dist/protocol/listener-errors.js"
-    }
-  },
   "description": "Typed Codex app-server JSON-RPC client and Node.js transports.",
   "engines": {
     "node": ">=22.19.0"
@@ -59,11 +32,11 @@
   "sideEffects": false,
   "devDependencies": {
     "@types/node": "25.9.5",
-    "@vitest/coverage-v8": "4.1.10",
+    "@vitest/coverage-v8": "4.1.12",
     "typescript": "6.0.3",
-    "vite": "8.1.5",
-    "vitest": "4.1.10",
-    "vitepress": "1.6.4"
+    "vite": "8.1.7",
+    "vitepress": "1.6.4",
+    "vitest": "4.1.12"
   },
   "publishConfig": {
     "access": "public",
@@ -72,5 +45,27 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Korus-Dev/codex-sdk.git"
+  },
+  "author": {
+    "name": "Nicolas Bonamy",
+    "email": "nicolas@bonamy.fr"
+  },
+  "homepage": "https://github.com/Korus-Dev/codex-sdk#readme",
+  "bugs": {
+    "url": "https://github.com/Korus-Dev/codex-sdk/issues"
+  },
+  "keywords": [
+    "codex",
+    "app-server",
+    "json-rpc",
+    "typescript",
+    "sdk"
+  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "overrides": {
+    "vitepress": {
+      "vite": "6.4.6"
+    }
   }
 }

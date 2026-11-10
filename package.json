@@ -1,6 +1,6 @@
 {
   "name": "@korus-dev/codex-sdk",
-  "version": "0.167.0",
+  "version": "0.167.1",
   "description": "Typed Codex app-server JSON-RPC client and Node.js transports.",
   "license": "Apache-2.0",
   "author": "Nicolas Bonamy",
@@ -26,6 +26,13 @@
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
   "files": [
     "dist",
     "README.md",

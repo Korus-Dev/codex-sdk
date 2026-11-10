@@ -15,10 +15,11 @@ try {
     assert(!file.endsWith('.tgz') && !file.split('/').some(part => part === '.env' || part.startsWith('.env.') || ['node_modules', 'src', 'tests', 'docs', '.vitepress'].includes(part)), `Private file: ${file}`);
     assert(['README.md', 'LICENSE', 'CHANGELOG.md', 'package.json'].includes(file) || /^dist\/.*(?:\.js|\.js\.map|\.d\.ts|\.d\.ts\.map)$/.test(file), `Unexpected file: ${file}`);
   }
-  for (const file of ['README.md', 'LICENSE', 'CHANGELOG.md', 'package.json', manifest.main, manifest.types]) {
+  const targets = Object.values(manifest.exports).flatMap(entry => typeof entry === 'string' ? [entry] : Object.values(entry));
+  for (const file of ['README.md', 'LICENSE', 'CHANGELOG.md', 'package.json', manifest.main, manifest.types, ...targets]) {
     assert(typeof file === 'string' && files.has(file.replace(/^\.\//, '')), `Missing ${file}`);
   }
-  const entries = ['.'];
+  const entries = Object.keys(manifest.exports).filter(entry => entry !== './package.json');
   fs.writeFileSync(path.join(temporary, 'package.json'), JSON.stringify({ private: true, type: 'module' }));
   npm(['install', '--ignore-scripts', '--no-audit', '--no-fund', '--package-lock=false', path.join(temporary, archive.filename)]);
   // Every public runtime entry must load in plain Node without Vite aliases or a provider process.

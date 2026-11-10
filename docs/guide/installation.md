@@ -9,7 +9,9 @@ npm install @korus-dev/codex-sdk
 npm install --save-dev typescript @types/node
 ```
 
-Use ESM (`"type": "module"` in your application's `package.json`). TypeScript projects use `module: "ESNext"` and `moduleResolution: "Bundler"`, matching the SDK build configuration. Node ambient types must be enabled in your TypeScript project (`"types": ["node"]` when your config restricts them). CommonJS `require` is not an exported entry point.
+The package is ESM-only. Set `"type": "module"` in your application's `package.json`. TypeScript projects use `module: "ESNext"` and `moduleResolution: "Bundler"`. Legacy `node10` resolution is not supported. Node ambient types must be enabled in your TypeScript project (`"types": ["node"]` when your config restricts them).
+
+Import the SDK from `@korus-dev/codex-sdk`. The exports map exposes the package root and `@korus-dev/codex-sdk/package.json`.
 
 The SDK and Codex CLI are separate packages. Install the CLI version you intend to use, authenticate it using your chosen account flow, and select its executable in the transport. No API key is needed for the local test suite or schema generation.
 

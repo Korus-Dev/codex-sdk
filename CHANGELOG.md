@@ -1,9 +1,11 @@
 # Changelog
 
-## Unreleased
+## 0.167.1
 
+- Define the public package entry points with an explicit exports map.
 - Standardize ESM builds, installed-package verification, documentation, and release workflows.
 - Add quiet agent test runs with failure details and a completion marker.
+- Continue targeting the unchanged codex-cli 0.167.0 protocol schema.
 
 ## 0.167.0
 

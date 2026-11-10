@@ -1,17 +1,17 @@
 # Exports
 
-Import client, transports, executable discovery, wire types and errors, listener helpers, and generated protocol types from `codex-sdk`.
+Import client, transports, executable discovery, wire types and errors, listener helpers, and generated protocol types from `@korus-dev/codex-sdk`.
 
 ## Runtime entry points
 
 | Import | Exports |
 | --- | --- |
-| `codex-sdk` | Complete public API |
-| `codex-sdk/protocol` | Client, protocol types, method maps, wire helpers, schema version |
-| `codex-sdk/protocol/client` | `CodexAppServerClient` and its option/responder types |
-| `codex-sdk/protocol/wire` | `RpcRemoteError`, `RpcTransportProtocolError`, `isRecord`, `isRpcError`, wire types |
-| `codex-sdk/protocol/schema-version` | `codexSchemaCliVersion` |
-| `codex-sdk/protocol/listener-errors` | `notifyListeners`, `reportListenerError`, `ListenerErrorHandler` |
+| `@korus-dev/codex-sdk` | Complete public API |
+| `@korus-dev/codex-sdk/protocol` | Client, protocol types, method maps, wire helpers, schema version |
+| `@korus-dev/codex-sdk/protocol/client` | `CodexAppServerClient` and its option/responder types |
+| `@korus-dev/codex-sdk/protocol/wire` | `RpcRemoteError`, `RpcTransportProtocolError`, `isRecord`, `isRpcError`, wire types |
+| `@korus-dev/codex-sdk/protocol/schema-version` | `codexSchemaCliVersion` |
+| `@korus-dev/codex-sdk/protocol/listener-errors` | `notifyListeners`, `reportListenerError`, `ListenerErrorHandler` |
 
 The root exports `notifyListeners` and `ListenerErrorHandler`; use the listener-errors subpath for `reportListenerError`.
 
@@ -20,12 +20,12 @@ The root exports `notifyListeners` and `ListenerErrorHandler`; use the listener-
 Generated declarations and method maps intentionally have no runtime entry:
 
 ```ts
-import type { Thread } from 'codex-sdk/protocol/generated/v2/Thread';
-import type { CodexAppServerMethodMap } from 'codex-sdk/protocol/method-map';
-import type { CodexServerRequestMethodMap } from 'codex-sdk/protocol/server-request-map';
+import type { Thread } from '@korus-dev/codex-sdk/protocol/generated/v2/Thread';
+import type { CodexAppServerMethodMap } from '@korus-dev/codex-sdk/protocol/method-map';
+import type { CodexServerRequestMethodMap } from '@korus-dev/codex-sdk/protocol/server-request-map';
 ```
 
-Use `import type`. The wildcard `codex-sdk/protocol/*` resolves declarations, while explicitly listed runtime entries above also resolve ESM.
+Use `import type`. The wildcard `@korus-dev/codex-sdk/protocol/*` resolves declarations, while explicitly listed runtime entries above also resolve ESM.
 
 ## Protocol compatibility
 

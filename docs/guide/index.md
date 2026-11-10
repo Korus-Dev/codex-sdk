@@ -1,6 +1,6 @@
 # Build an app on Codex
 
-Use `codex-sdk` to send typed requests to the Codex app-server, stream notifications, and respond to approval or tool requests from your Node.js host.
+Use `@korus-dev/codex-sdk` to send typed requests to the Codex app-server, stream notifications, and respond to approval or tool requests from your Node.js host.
 
 Start with a [conversation](/guide/quick-start), choose a [transport](/api/transports), then add your app's [approval and tool handlers](/guide/extensions).
 

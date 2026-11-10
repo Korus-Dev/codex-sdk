@@ -1,13 +1,13 @@
 # codex-sdk
 
-Build Node.js apps on the Codex app-server with a typed JSON-RPC client, notifications, approval responses, and stdio or Unix-socket transports. The package has no runtime dependencies beyond Node.js built-ins. It is private and unpublished.
+Build Node.js apps on the Codex app-server with a typed JSON-RPC client, notifications, approval responses, and stdio or Unix-socket transports. The package has no runtime dependencies beyond Node.js built-ins.
 
 The supported runtime floor is Node.js 22.19.0. Development uses Node.js 26.12.1, recorded in `.node-version`. The protocol schema is pinned to **codex-cli 0.167.0**, including experimental APIs. Access to a method still depends on the running server and its configuration.
 
 ## Start a conversation
 
 ```ts
-import { CodexAppServerClient, CodexAppServerStdioTransport } from 'codex-sdk';
+import { CodexAppServerClient, CodexAppServerStdioTransport } from '@korus-dev/codex-sdk';
 
 const transport = new CodexAppServerStdioTransport({
   command: '/absolute/path/to/codex',
@@ -72,11 +72,11 @@ The synchronous hook runs once per admitted outgoing request, including send, re
 
 ## Imports
 
-The root exports runtime APIs and generated types. Runtime subpaths are `codex-sdk/protocol`, `/protocol/client`, `/protocol/wire`, `/protocol/schema-version`, and `/protocol/listener-errors`. Generated declarations and method maps are deliberately **types-only**:
+The root exports runtime APIs and generated types. Runtime subpaths are `@korus-dev/codex-sdk/protocol`, `/protocol/client`, `/protocol/wire`, `/protocol/schema-version`, and `/protocol/listener-errors`. Generated declarations and method maps are deliberately **types-only**:
 
 ```ts
-import type { Thread } from 'codex-sdk/protocol/generated/v2/Thread';
-import type { CodexAppServerMethodMap } from 'codex-sdk/protocol/method-map';
+import type { Thread } from '@korus-dev/codex-sdk/protocol/generated/v2/Thread';
+import type { CodexAppServerMethodMap } from '@korus-dev/codex-sdk/protocol/method-map';
 ```
 
 Use `import type` for these paths; there is no runtime module for generated types.
@@ -87,7 +87,7 @@ Read the [guide](docs/guide/index.md) and [API reference](docs/api/index.md), or
 
 ## Develop and regenerate
 
-Package-local tooling versions are declared in `devDependencies`. Install through the containing workspace's dependency workflow, then use `npm run typecheck`, `npm run typecheck:tests`, and `npm test`. `npm run test:coverage` retains the 85% statement gate. `npm run build` emits ESM and declarations under `dist/`.
+Package-local tooling versions are declared in `devDependencies`. Run `npm ci` in this repository, then use `npm run typecheck`, `npm run typecheck:tests`, and `npm test`. `npm run test:coverage` retains the 85% statement gate. `npm run build` emits ESM and declarations under `dist/`.
 
 With a matching Codex CLI available:
 
@@ -105,3 +105,7 @@ npm run generate:schema -- --codex /path/to/new/codex --expected-version 'codex-
 ```
 
 Review generated types, both method maps, and the schema version together; run the typechecks, tests, build, and `check:schema` with that CLI. The CLI must be provisioned separately; the generator never downloads or installs it.
+
+## Local development
+
+Install dependencies with `npm ci` in this repository. npm packages are used by default. Set `SDK_LOCAL_SOURCE=1` in `.env` to run dependency source from sibling SDK repositories; `SDK_SOURCE_ROOT` can point to another directory containing `codex-sdk`, `multi-agent-sdk` and `agent-ui-sdk`. Build local dependencies first, in that order. Vite and tests use live source; typechecking uses the local builds’ declarations. `SDK_LOCAL_SOURCE=0` explicitly selects installed npm packages.

@@ -1,6 +1,5 @@
 {
   "version": "0.0.0",
-  "private": true,
   "type": "module",
   "license": "Apache-2.0",
   "files": [
@@ -9,13 +8,13 @@
     "README.md"
   ],
   "scripts": {
-    "build": "vite build && tsc -p tsconfig.build.json",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "build": "vite build && node scripts/typecheck.mjs plain -p tsconfig.build.json",
+    "typecheck": "node scripts/typecheck.mjs plain --noEmit",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "generate:schema": "node scripts/generate-codex-schema.mjs",
     "check:schema": "node scripts/generate-codex-schema.mjs --check",
-    "typecheck:tests": "tsc -p tsconfig.tests.json --noEmit",
+    "typecheck:tests": "node scripts/typecheck.mjs plain -p tsconfig.tests.json --noEmit",
     "dev:docs": "vitepress dev docs --port 5175",
     "build:docs": "npm run check:rpc && npm run typecheck:docs && vitepress build docs",
     "preview:docs": "vitepress preview docs --port 4175",
@@ -23,7 +22,7 @@
     "check:rpc": "node scripts/generate-protocol-docs.mjs --check",
     "typecheck:docs": "tsc -p tsconfig.docs.json --noEmit"
   },
-  "name": "codex-sdk",
+  "name": "@korus-dev/codex-sdk",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -65,5 +64,13 @@
     "vite": "8.1.5",
     "vitest": "4.1.10",
     "vitepress": "1.6.4"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Korus-Dev/codex-sdk.git"
   }
 }

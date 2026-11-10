@@ -1,4 +1,4 @@
-import { CodexAppServerClient, CodexAppServerStdioTransport } from 'codex-sdk';
+import { CodexAppServerClient, CodexAppServerStdioTransport } from '@korus-dev/codex-sdk';
 
 const client = new CodexAppServerClient(new CodexAppServerStdioTransport({
   command: '/absolute/path/to/codex',

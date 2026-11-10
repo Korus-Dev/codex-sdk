@@ -4,7 +4,13 @@
 
 A typed TypeScript client for streaming conversations, responding to approvals, and connecting your tools to Codex. Bring your own application state and interface—the SDK handles the protocol and connection.
 
-[Documentation](https://korus-dev.github.io/codex-sdk/) · [Getting started](https://korus-dev.github.io/codex-sdk/guide/quick-start.html) · [API reference](https://korus-dev.github.io/codex-sdk/api/) · [Contributing](CONTRIBUTING.md)
+[![npm version](https://img.shields.io/npm/v/%40korus-dev%2Fcodex-sdk?color=0b7a65)](https://www.npmjs.com/package/@korus-dev/codex-sdk)
+[![CI](https://github.com/Korus-Dev/codex-sdk/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Korus-Dev/codex-sdk/actions/workflows/ci.yml)
+[![Documentation](https://github.com/Korus-Dev/codex-sdk/actions/workflows/docs.yml/badge.svg?branch=main)](https://korus-dev.github.io/codex-sdk/)
+[![License](https://img.shields.io/badge/license-Apache--2.0-0b7a65.svg)](LICENSE)
+[![Node.js](https://img.shields.io/node/v/%40korus-dev%2Fcodex-sdk?color=339933)](package.json)
+
+**[Documentation →](https://korus-dev.github.io/codex-sdk/)** · [Getting started](https://korus-dev.github.io/codex-sdk/guide/quick-start.html) · [API reference](https://korus-dev.github.io/codex-sdk/api/) · [Contributing](CONTRIBUTING.md)
 
 ## What you get
 
@@ -16,6 +22,8 @@ A typed TypeScript client for streaming conversations, responding to approvals, 
 - **Zero runtime dependencies.** ESM built on Node.js, with TypeScript declarations for bundler-based projects.
 
 This is an independently maintained SDK, separate from OpenAI's official SDKs.
+
+Use [multi-agent-sdk](https://github.com/Korus-Dev/multi-agent-sdk) for a provider-neutral agent API and [agent-ui-sdk](https://github.com/Korus-Dev/agent-ui-sdk) for Vue conversation components and Electron integration.
 
 ## Install
 
@@ -114,7 +122,11 @@ npm run check
 
 Development uses Node.js 26.12.1, pinned in `.node-version`. `check` runs typechecks, tests with coverage, the package build, a packed-consumer check, and the VitePress build. Preview the VitePress documentation with `npm run dev:docs`.
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) and the [development guide](docs/guide/development.md) for schema generation, CLI verification, and release workflows.
+See the [development guide](docs/guide/development.md) for schema generation, CLI verification, and release workflows.
+
+## Contributing
+
+Issues and pull requests are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md), or [open an issue](https://github.com/Korus-Dev/codex-sdk/issues) for bugs and questions.
 
 ## License and security
 

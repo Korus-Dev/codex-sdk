@@ -1,5 +1,9 @@
 # Codex SDK
 
+## Role
+
+This package is the interface to the Codex app-server: typed JSON-RPC, transports and nothing else. Provider-neutral behavior belongs in multi-agent-sdk, and UI belongs in agent-ui-sdk.
+
 Keep this package focused on raw Codex app-server protocol fidelity, request lifecycle, transports, and executable discovery. Do not add provider-neutral projections, UI state, application policy, or app-specific tracing.
 
 Read `CONTRIBUTING.md` and `docs/guide/testing.md` before changing tests. Protect observable behavior and demonstrate a red state for a regression. Preserve the coverage gate.

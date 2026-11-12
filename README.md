@@ -78,13 +78,15 @@ The SDK finds Codex automatically and uses your current directory. See the [full
 
 Configure `command`, `cwd`, `codexHome`, environment variables, and Codex overrides in your trusted Node.js host. There are no implicit feature flags. Set `executableDiscovery: false` when you want only your supplied command and environment.
 
-See [transports and executable discovery](https://korus-dev.github.io/codex-sdk/api/transports.html) for configuration and custom transports.
+See [Connect to Codex](https://korus-dev.github.io/codex-sdk/guide/connecting.html) to choose a transport, and [transports and executable discovery](https://korus-dev.github.io/codex-sdk/api/transports.html) for every option and custom transports.
 
 ## Go further
 
 | Build | Guide |
 | --- | --- |
-| History and conversation recovery | [Threads and turns](https://korus-dev.github.io/codex-sdk/guide/conversations.html) |
+| Live rendering of turns | [Stream events](https://korus-dev.github.io/codex-sdk/guide/streaming.html) |
+| History and thread resumption | [Threads and turns](https://korus-dev.github.io/codex-sdk/guide/conversations.html) |
+| Crash and disconnect handling | [Reconnect and recover](https://korus-dev.github.io/codex-sdk/guide/recovery.html) |
 | Account and sign-in flows | [Authentication](https://korus-dev.github.io/codex-sdk/guide/authentication.html) |
 | App-owned tools and approval handling | [Approvals and tools](https://korus-dev.github.io/codex-sdk/guide/extensions.html) |
 | External tool services | [MCP servers](https://korus-dev.github.io/codex-sdk/guide/mcp.html) |

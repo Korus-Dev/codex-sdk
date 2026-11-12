@@ -4,7 +4,7 @@ A thread holds conversation history. A turn submits input and produces notificat
 
 ## Stream output
 
-Subscribe to `item/agentMessage/delta` for text and `turn/completed` for the final turn status. Notifications carry thread and turn identifiers; route them to the matching app-owned state. The SDK delivers both global and method-specific notification listeners. Each registration returns an unsubscribe function.
+Subscribe to `item/agentMessage/delta` for text and `turn/completed` for the final turn status. The [streaming guide](/guide/streaming) covers items, ordering, and a reusable turn runner. Notifications carry thread and turn identifiers; route them to the matching app-owned state. The SDK delivers both global and method-specific notification listeners. Each registration returns an unsubscribe function.
 
 A `turn/start` response does not mean generation has finished. A completed turn can have a failed or interrupted status; inspect the notification's turn payload.
 
@@ -16,7 +16,7 @@ Use `thread/read` for persisted thread data and `thread/resume` to load a thread
 
 Send `turn/interrupt` with the active `threadId` and `turnId`. Continue listening for the server's final notifications to reconcile app state.
 
-Register `onDisconnect` to handle connection loss. Pending requests reject on disconnection; the SDK does not replay requests or reconnect automatically. Your app can start a fresh connection, initialize it, and resume the intended thread. Avoid blindly replaying mutations when their server-side outcome is unknown.
+Register `onDisconnect` to handle connection loss. Pending requests reject on disconnection; the SDK does not replay requests or reconnect automatically. Your app can start a fresh connection, initialize it, and resume the intended thread; see [reconnect and recover](/guide/recovery). Avoid blindly replaying mutations when their server-side outcome is unknown.
 
 ## List, read, and resume
 

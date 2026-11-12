@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 260" role="img" aria-labelledby="t d" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <title id="t">Codex SDK architecture</title>
+  <desc id="d">Your trusted Node.js host calls CodexAppServerClient. The client talks through a stdio or Unix-socket transport to the Codex app-server.</desc>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#087f6a"/></marker>
+  </defs>
+  <rect x="1" y="1" width="878" height="258" rx="14" fill="none" stroke="#087f6a" stroke-opacity=".35" stroke-dasharray="6 6"/>
+  <text x="24" y="30" font-size="13" font-weight="600" fill="#087f6a">Trusted Node.js host</text>
+  <g font-size="15" text-anchor="middle">
+    <rect x="30" y="80" width="190" height="100" rx="10" fill="#087f6a" fill-opacity=".1" stroke="#087f6a"/>
+    <text x="125" y="122" font-weight="600" fill="#087f6a">Your application</text>
+    <text x="125" y="146" font-size="13" fill="#6b7280">state, UI, policy</text>
+
+    <rect x="290" y="80" width="230" height="100" rx="10" fill="#087f6a" fill-opacity=".1" stroke="#087f6a"/>
+    <text x="405" y="116" font-weight="600" fill="#087f6a">CodexAppServerClient</text>
+    <text x="405" y="140" font-size="13" fill="#6b7280">typed requests, notifications,</text>
+    <text x="405" y="158" font-size="13" fill="#6b7280">server-request responders</text>
+
+    <rect x="590" y="50" width="260" height="70" rx="10" fill="#3977dd" fill-opacity=".1" stroke="#3977dd"/>
+    <text x="720" y="82" font-weight="600" fill="#3977dd">Stdio transport</text>
+    <text x="720" y="102" font-size="13" fill="#6b7280">launches and owns the process</text>
+
+    <rect x="590" y="140" width="260" height="70" rx="10" fill="#3977dd" fill-opacity=".1" stroke="#3977dd"/>
+    <text x="720" y="172" font-weight="600" fill="#3977dd">Unix-socket transport</text>
+    <text x="720" y="192" font-size="13" fill="#6b7280">attaches to a running server</text>
+  </g>
+  <g stroke="#087f6a" stroke-width="2" fill="none" marker-end="url(#a)" marker-start="url(#a)">
+    <path d="M222 130H288"/>
+    <path d="M522 110L588 85"/>
+    <path d="M522 150L588 175"/>
+  </g>
+  <text x="720" y="240" font-size="13" text-anchor="middle" fill="#6b7280">to the Codex app-server</text>
+</svg>
